@@ -20,25 +20,33 @@ class PluginManager
     public function loadPlugins()
     {
         $installedPlugins = $this->getInstalledPlugins();
-        
-        \Log::info("Installed plugins: " . json_encode($installedPlugins));
+
+        if(app('env') != 'production') {
+            \Log::info("Installed plugins: " . json_encode($installedPlugins));
+        }
 
         foreach ($installedPlugins as $pluginName) {
             $studlyPluginName = Str::studly($pluginName);
             $pluginClass = "Wave\\Plugins\\{$studlyPluginName}\\{$studlyPluginName}Plugin";
-            
-            \Log::info("Attempting to load plugin: {$pluginClass}");
-            
+
+            if (app('env') != 'production') {
+                \Log::info("Attempting to load plugin: {$pluginClass}");
+            }
+
             $expectedPath = $this->findPluginFile($pluginName);
             if ($expectedPath) {
-                \Log::info("File found at: {$expectedPath}, attempting to include it.");
+                if (app('env') != 'production') {
+                    \Log::info("File found at: {$expectedPath}, attempting to include it.");
+                }
                 include_once $expectedPath;
-                
+
                 if (class_exists($pluginClass)) {
                     $plugin = new $pluginClass($this->app);
                     $this->plugins[$pluginName] = $plugin;
                     $this->app->register($plugin);
-                    \Log::info("Successfully loaded plugin: {$pluginClass}");
+                    if (app('env') != 'production') {
+                        \Log::info("Successfully loaded plugin: {$pluginClass}");
+                    }
                 } else {
                     \Log::warning("Plugin class not found after including file: {$pluginClass}");
                 }
@@ -52,13 +60,13 @@ class PluginManager
     {
         $basePath = resource_path('plugins');
         $studlyName = Str::studly($pluginName);
-        
+
         // Check for exact case match
         $exactPath = "{$basePath}/{$studlyName}/{$studlyName}Plugin.php";
         if (File::exists($exactPath)) {
             return $exactPath;
         }
-        
+
         // Check for case-insensitive match
         $directories = File::directories($basePath);
         foreach ($directories as $directory) {
@@ -69,14 +77,14 @@ class PluginManager
                 }
             }
         }
-        
+
         return null;
     }
 
     protected function runPostActivationCommands(Plugin $plugin)
     {
         $commands = $plugin->getPostActivationCommands();
-        
+
         foreach ($commands as $command) {
             if (is_string($command)) {
                 Artisan::call($command);

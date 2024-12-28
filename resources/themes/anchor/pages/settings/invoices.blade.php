@@ -15,7 +15,7 @@
                 description="Your past plan invoices"
             >
                 @empty($invoices)
-                    <x-app.alert id="dashboard_alert">No invoices available.</x-app.alert>
+                    <x-app.alert id="dashboard_alert" type="info">No invoices available.</x-app.alert>
                     <p class="mt-3">You do not have any past invoices. When you subscribe to a plan you'll see your past invoices here.</p>
                 @else
                     <div class="overflow-hidden border border-gray-200 rounded-lg">

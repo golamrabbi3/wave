@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Support\Str;
 use Wave\User as WaveUser;
 use Illuminate\Notifications\Notifiable;
+use Spatie\Activitylog\Models\Activity;
 use Wave\Traits\HasProfileKeyValues;
 
 class User extends WaveUser
@@ -43,7 +44,7 @@ class User extends WaveUser
     protected static function boot()
     {
         parent::boot();
-        
+
         // Listen for the creating event of the model
         static::creating(function ($user) {
             // Check if the username attribute is empty
@@ -66,5 +67,10 @@ class User extends WaveUser
             // Assign the default role
             $user->assignRole( config('wave.default_user_role', 'registered') );
         });
+    }
+
+    public function projects()
+    {
+        return $this->hasMany(Project::class);
     }
 }
